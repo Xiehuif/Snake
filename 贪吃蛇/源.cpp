@@ -14,26 +14,32 @@ using namespace std;
 inline void trans(int,int);
 void read();
 void refresh();
-//inline void wrin();
+void init();
+void start();
+void snakemove();
 
-int mpx=25, mpy=20;
-int spx,spy;
-bool map[100][80];
-IMAGE wall;
-IMAGE snake;
-
-class pos {
+class posi {
 public:
 	int x;
 	int y;
 };
 
-vector<pos> snakep;
+vector<posi> snakep;
+
+int mpx=25, mpy=20;
+int spx,spy;
+int foodx = 5, foody = 5;
+bool map[100][80];
+int direct=1;
+IMAGE wall;
+IMAGE snake;
+IMAGE food;
+
+
 
 int main() {
-	initgraph(cx, cy);
-	read();
-	refresh();
+	init();
+	start();
 	getch();
 }
 
@@ -43,6 +49,7 @@ void read() {
 	int tempx,tempy;
 	loadimage(&wall, _T("E:\\m\\wall.bmp"));
 	loadimage(&snake, _T("E:\\m\\snake.png"));
+	loadimage(&food, _T("E:\\m\\food.png"));
 	while (scanf("%d %d ", &tempx, &tempy) != EOF) {
 		map[tempx][tempy] = true;
 	}
@@ -51,15 +58,58 @@ void read() {
 void refresh()
 {
 	cleardevice();
+	trans(foodx, foody);
+	putimage(spx, spy, &food);
 	for (int i = mpx - 25; i <= mpx + 25; i++) {
 		for (int j = mpy - 20; j <= mpy + 20; j++) {
-			if (i < 0 || j < 0) continue;
+			if (i < 0 || j < 0) {
+				trans(i, j);
+				putimage(spx, spy, &wall);
+				continue;
+			}
 			if (map[i][j]) {
 				trans(i, j);
 				putimage(spx, spy, &wall);
 			}
 		}
 	}
+}
+
+void init()
+{
+	mpx = 25;
+	mpy = 20;
+	snakep.clear();
+	posi t;
+	t.x = mpx;
+	t.y = mpy;
+	snakep.push_back(t);
+	memset(map,0,sizeof(map));
+}
+
+void start()
+{
+	initgraph(cx, cy);
+	read();
+	refresh();
+}
+
+void snakemovechange()
+{
+	char c;
+	if (_kbhit())	c = _getch();
+	else return;
+	switch (direct)
+	{
+	case 0:
+		if (c == 'w') direct = 1;
+		if (c == 's') direct = 3;
+	case 1:
+		if (c == 'a') direct = 0;
+	default:
+		break;
+	}
+
 }
 
 inline void trans(int lpx,int lpy) {
@@ -71,11 +121,4 @@ inline void trans(int lpx,int lpy) {
 		spy = spy * 20;
 	}
 }
-/*
-inline void wrin() {
-	int temp[2];
-	temp[0] = spx;
-	temp[1] = spy;
-	p.push(temp);
-}
-*/
+
